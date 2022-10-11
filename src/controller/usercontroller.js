@@ -15,7 +15,7 @@ const register = async (req, res) => {
 
     let { fname, lname, email, phone, password, address } = requestBody
 
-    address = JSON.parse(address)
+    address = JSON.parse(JSON.stringify(address))
 
     let files = req.files
     let uploadedFileURL
