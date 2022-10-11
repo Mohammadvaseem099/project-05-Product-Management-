@@ -1,3 +1,7 @@
+const bcrypt = require("bcryptjs/dist/bcrypt")
+
+
+
 const isValid = (value) => {
 
     if (typeof value != 'string') return false
