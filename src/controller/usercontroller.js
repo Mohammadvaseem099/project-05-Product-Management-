@@ -7,7 +7,8 @@ const aws = require('../validator/aws')
 const register = async (req, res) => {
   try {
 
-    let requestBody = JSON.parse(JSON.stringify(req.body))
+   let requestBody = JSON.parse(JSON.stringify(req.body))
+   //let requestBody=req.body
 
     if (!validator.isValidRequestBody(requestBody)) {
       return res.status(400).send({ status: false, message: 'invalid Input Parameters' })
@@ -66,7 +67,7 @@ const register = async (req, res) => {
       return res.status(400) .send({ status: false, message: `This Phone ${phone} No. is Already In Use` })
     }
 
-    if (!validator.isValid(password)) {
+   if (!validator.isValid(password)) {
       return res.status(400).send({ status: false, message: 'password Is Required' })
     }
 
@@ -135,7 +136,7 @@ const register = async (req, res) => {
     uploadedFileURL = await aws.uploadFile(files[0]);
 
     let finalData = {
-      fname: fname,
+      fname:fname,
       lname,
       email,
       profileImage: uploadedFileURL,
