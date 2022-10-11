@@ -6,7 +6,7 @@ const app =express();
 app.use(express.json());
 
 
-let url = "cluster any DB"
+let url = "mongodb+srv://saurav438c:Bharat123@cluster0.ueecgjt.mongodb.net/project5"
 let port = process.env.PORT || 3000;
 
 mongoose.connect(url, {userNewUrlParser: true})
