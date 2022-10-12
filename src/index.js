@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(multer().any())
 
 
-let url = "mongodb+srv://saurav438c:Bharat123@cluster0.ueecgjt.mongodb.net/project5"
+let url = "mongodb+srv://saurav438c:Bharat123@cluster0.ueecgjt.mongodb.net/group40Database"
 let port = process.env.PORT || 3000;
 
 mongoose.connect(url, {useNewUrlParser: true})
