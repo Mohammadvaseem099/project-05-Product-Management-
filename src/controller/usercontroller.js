@@ -10,7 +10,8 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const register = async (req, res) => {
   try {
 
-    let requestBody = JSON.parse(JSON.stringify(req.body))
+    // let requestBody = JSON.parse(JSON.stringify(req.body))
+    let requestBody = req.body
 
     if (!validator.isValidRequestBody(requestBody)) {
       return res.status(400).send({ status: false, message: 'invalid Input Parameters' })
@@ -18,7 +19,8 @@ const register = async (req, res) => {
 
     let { fname, lname, email, phone, password, address } = requestBody
 
-    address = JSON.parse(JSON.stringify(address))
+    // address = JSON.parse(address)
+   
 
     let files = req.files
     let uploadedFileURL
@@ -176,7 +178,7 @@ const login = async (req, res) => {
     const token = jwt.sign({
       id: user._id.toString(),
       iat: Math.floor(new Date().getTime() / 1000)
-    }, "project05-group40", {expiresIn: "1h"});
+    }, "project05-group40", {expiresIn: "23h"});
   
     let data = {
       userId: user._id,
@@ -223,153 +225,145 @@ const getUser = async function(req, res) {
 
 const updateUser = async (req, res) => {
   
-  let data = req.body
   let file = req.files
+  let obj = {}
 
-  let uploadedFileURL
-    if(file) {
-      
-      if(file.length > 0) {
-        if(!validator.isValidImage(file)) {
-          return res.status(400).send({status: false, Message: "Invalid image type" })
-        }
-      } else {
-      return res.status(400).send({ status: false, message: 'Please, provide file to upload' })
+  if(file) {
+          
+    if(file.length > 0) {
+      if(!validator.isValidImage(file[0])) {
+        return res.status(400).send({status: false, Message: "Invalid image type" })
+      }
+    } else {
+    return res.status(400).send({ status: false, message: 'Please, provide file to upload' })
     }
-    uploadedFileURL = await aws.uploadFile(file[0])
-  }
+  let uploadedFileURL = await aws.uploadFile(file[0])
+  if(uploadedFileURL) obj['profileImage'] = uploadedFileURL
+}
+  
+  let data = req.body
+  if(!validator.isValidRequestBody(data) && !file) return res.status(400).send({status: false, message: "Enter data which you want to update!"})
   
 
-  if(!validator.isValidRequestBody(data)) return res.status(400).send({status: false, message: "Enter data which you want to update!"})
   
-  let {fname, lname, email, phone, password, address} = data
-  
-  if(fname) {
+  if(data.fname) {
 
-    if (!validator.isValid(fname)) {
+    if (!validator.isValid(data.fname)) {
       return res.status(400).send({ Status: false, Message: 'invalid First Name' })
     }
   
-    if (!validator.isValidCharacters(fname)) {
+    if (!validator.isValidCharacters(data.fname)) {
       return res.status(400).send({ Status: false, msg: "This attribute can only have letters as input" })
     }
+    obj['fname'] = data.fname
   }
   
-  if(lname) {
+  if(data.lname) {
 
-    if(!validator.isValid(lname)) {
+    if(!validator.isValid(data.lname)) {
       return res.status(400).send({ Status: false, Message: 'invalid Last Name' })
     }
     
-    if(!validator.isValidCharacters(lname)) {
+    if(!validator.isValidCharacters(data.lname)) {
       return res.status(400).send({ Status: false, msg: "This attribute can only have letters as input" })
     }
+    obj['lname'] = data.lname
   }
   
-  if(email) {
+  if(data.email) {
     
-    if(!validator.isValid(email)) {
+    if(!validator.isValid(data.email)) {
       return res.status(400).send({ Status: false, Message: 'Email is required' })
     }
     
-    if(!validator.isValidEmail(email)) {
+    if(!validator.isValidEmail(data.email)) {
       return res.status(400) .send({ status: false, message: 'please enter a valid email' })
     }
     
-    let isEmailExist = await userModel.findOne({email})
+    let isEmailExist = await userModel.findOne({email: data.email})
     if(isEmailExist) return res.status(400).send({ status: false, message: `This email ${email} is Already In Use` })
+    obj['email'] = data.email
   }
 
   let hashedPassword
-  if(password) {
+  if(data.password) {
 
-    if(!validator.isValid(password)) {
+    if(!validator.isValid(data.password)) {
       return res.status(400).send({ Status: false, Message: 'Password is required' })
     }
     
-    if(!validator.isvalidPass(password)) {
+    if(!validator.isvalidPass(data.password)) {
       return res.status(400) .send({ status: false, message: 'please should be in between 8 - 15' })
     }
-    
-    hashedPassword = await validator.hashedPassword(password);
+    hashedPassword = await validator.hashedPassword(data.password);
+    obj['password'] = hashedPassword
   }
   
-  if(phone) {
+  if(data.phone) {
 
-    if(!validator.isValid(phone)) {
+    if(!validator.isValid(data.phone)) {
       return res.status(400).send({ Status: false, Message: 'Phone is required' })
     }
     
-    if(!validator.isValidPhone(phone)) {
+    if(!validator.isValidPhone(data.phone)) {
       return res.status(400).send({ Status: false, Message: 'Phone no. is invalid' })
     }
   
-    let isPhoneExist = await userModel.findOne({phone})
+    let isPhoneExist = await userModel.findOne({phone: data.phone})
     if(isPhoneExist) return res.status(400).send({Status: false, Message: `The Phone ${phone} no. is already used`})
+    obj['phone'] = data.phone
   }
 
-  if (address['shipping']) {
-    // address = JSON.parse(JSON.stringify(address))
-      if(address['shipping']['street']) {
-
-        if (!validator.isValid(address['shipping']['street'])) {
-          return res.status(400).send({ status: false, message: 'Shipping Street is required' })
-        }
-      }
+  if(data.address) {
+    let {shipping, billing} = data.address
+        if(shipping) {
+          if (!validator.isValid(data.address['shipping']['street'])) {
+            return res.status(400).send({ status: false, message: 'Shipping Street is required' })
+          }
+            if (!validator.isValid(data.address['shipping']['city'])) {
+              return res .status(400).send({ status: false, message: 'Shipping city is required' })
+            }
+           
+            if (!validator.isValid(data.address['shipping']['pincode'])) {
+              return res.status(400).send({ status: false, message: 'Shipping Pincode is required' })
+            }
     
-      if(address['shipping']['city']) {
+            if (!validator.isValidPincode(parseInt(data.address['shipping']['pincode']))) {
+              return res.status(400).send({ status: false, message: 'Invalid pincode' })
+            }
+          }else {
+            return res.status(400).send({ status: false, message: 'Shipping address is required' })
+          }
 
-        if (!validator.isValid(address['shipping']['city'])) {
-          return res .status(400).send({ status: false, message: 'Shipping city is required' })
+            if(billing) { 
+        
+              if (!validator.isValid(data.address['billing']['street'])) {
+                return res.status(400).send({ status: false, message: 'Billing Street is required' })
+              }
+        
+              if (!validator.isValid(data.address['billing']['city'])) {
+                return res.status(400).send({ status: false, message: 'Billing city is required' })
+            
+              }
+        
+              if (!validator.isValid(data.address['billing']['pincode'])) {
+                return res.status(400).send({ status: false, message: 'Billing Pincode is required' })
+              }
+        
+              if (!validator.isValidPincode(parseInt(data.address['billing']['pincode']))) {
+                return res.status(400).send({ status: false, message: 'Invalid pincode' })
+              }
+              
+            } else {
+              return res.status(400).send({ status: false, message: 'Billing address is required' })
+            }
+            obj['address'] = data.address
+  
         }
-      }
-    
-      if(address['shipping']['pincode']) {
+  
 
-        if (!validator.isValid(address['shipping']['pincode'])) {
-          return res.status(400).send({ status: false, message: 'Shipping Pincode is required' })
-        }
+  let user = await userModel.findOneAndUpdate  ({_id: req.params.userId}, obj, {new: true})
 
-        if (!validator.isValidPincode(parseInt(address['shipping']['pincode']))) {
-          return res.status(400).send({ status: false, message: 'Invalid pincode' })
-        }
-      }
-
-    }
-
-      
-    if(address['billing']) {
-
-      if(address['billing']['street']) {
-
-        if (!validator.isValid(address['billing']['street'])) {
-          return res.status(400).send({ status: false, message: 'Billing Street is required' })
-        }
-      }
-    
-      if(address['billing']['city']) {
-
-        if (!validator.isValid(address['billing']['city'])) {
-          return res.status(400).send({ status: false, message: 'Billing city is required' })
-      
-        }
-      }
-    
-      if(address['billing']['pincode']) {
-
-        if (!validator.isValid(address['billing']['pincode'])) {
-          return res.status(400).send({ status: false, message: 'Billing Pincode is required' })
-        }
-
-        if (!validator.isValidPincode(parseInt(address['billing']['pincode']))) {
-          return res.status(400).send({ status: false, message: 'Invalid pincode' })
-        }
-      } 
-      
-    }
-    
-
-  let user = await userModel.findOneAndUpdate({_id: req.params.userId}, {$set: {fname: fname, lname: lname, email: email, phone: phone, password: hashedPassword, profileImage: uploadedFileURL, address: address }}, {new: true})
   if(!user) return res.status(404).send({status: false, Message: "user not found" })
   return res.status(200).send({status: true, message: "User profile updated", data: user}) 
 
