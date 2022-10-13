@@ -10,8 +10,8 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const register = async (req, res) => {
   try {
 
-    // let requestBody = JSON.parse(JSON.stringify(req.body))
-    let requestBody = req.body
+   let requestBody = JSON.parse(JSON.stringify(req.body))
+   //let requestBody=req.body
 
     if (!validator.isValidRequestBody(requestBody)) {
       return res.status(400).send({ status: false, message: 'invalid Input Parameters' })
@@ -19,14 +19,13 @@ const register = async (req, res) => {
 
     let { fname, lname, email, phone, password, address } = requestBody
 
-    // address = JSON.parse(address)
-   
+    address = JSON.parse(address)
 
     let files = req.files
     let uploadedFileURL
 
     if (!validator.isValid(fname)) {
-      return res.status(400).send({ Status: false, Message: 'invalid First Name' })
+      return res.status(400).send({ Status: false, Message: ' First Name Mandotary' })
     }
 
     if (!validator.isValidCharacters(fname)) {
@@ -70,7 +69,7 @@ const register = async (req, res) => {
       return res.status(400) .send({ status: false, message: `This Phone ${phone} No. is Already In Use` })
     }
 
-    if (!validator.isValid(password)) {
+   if (!validator.isValid(password)) {
       return res.status(400).send({ status: false, message: 'password Is Required' })
     }
 

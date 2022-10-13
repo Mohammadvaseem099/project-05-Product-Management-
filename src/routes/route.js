@@ -13,6 +13,8 @@ router.post('/login', userController.login)
 router.get('/user/:userId/profile',auth.authenticate, userController.getUser)
 router.put('/user/:userId/profile',auth.authenticate, auth.authorization, userController.updateUser)
 
-router.post("/products", productController.createProduct)
+router.post("/createProduct", productController.createProduct)
+router.get('/products', productController.getProduct)
+router.get('/products/:productId', productController.getProductById)
 
 module.exports = router
