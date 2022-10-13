@@ -44,8 +44,30 @@ const isvalidPass = (password) => {
     return true
 
 }
+const isValidSize = (Arr) => {
+    let newArr = []
+    if (!Arr.length > 0)
+        return false
+
+    for (let i = 0; i < Arr.length; i++) {
+        if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(Arr[i].toUpperCase())) {
+            return false
+        }
+        newArr.push(Arr[i].toUpperCase())
+    }
+    return newArr
+}
+const isValidObjectId = (ObjectId) => {
+    return mongoose.Types.ObjectId.isValid(ObjectId)
+}
+
+
 const isValidCharacters = (value) => {
     return /^[A-Za-z]+$/.test(value)
+}
+
+const isValidNumber = function (value) {
+    return (!isNaN(value) && value > 0)
 }
 
 module.exports = {
@@ -58,5 +80,8 @@ module.exports = {
     hashedPassword,
     isValidImage,
     isvalidPass,
-    isValidCharacters
+    isValidCharacters,
+    isValidSize,
+    isValidNumber,
+    isValidObjectId
 }
