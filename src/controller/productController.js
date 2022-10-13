@@ -169,7 +169,7 @@ async function getProduct(req, res) {
   
       //checking size
       if (size) {
-        if (!isValidString(size.trim())) {
+        if (!isValidString(size)) {
           return res.status(400).send({ status: false, msg: "size must be in string" });
         }
         let arr = size.split(",");
@@ -178,7 +178,7 @@ async function getProduct(req, res) {
   
       //checking name
       if (name) {
-        if (!isValidString(name.trim())) {
+        if (!isValidString(name)) {
           return res.status(400).send({ status: false, msg: "name must be in string" });
         }
         obj.title = name;
@@ -186,7 +186,7 @@ async function getProduct(req, res) {
   
       //checking priceGreaterThan
       if (priceGreaterThan) {
-        if (!isValidPrice(priceGreaterThan.trim())) {
+        if (!isValidPrice(priceGreaterThan)) {
           return res.status(400).send({ status: false, msg: "priceGreaterThan must be in number" });
         }
         obj.price = { $gte: priceGreaterThan };
@@ -194,7 +194,7 @@ async function getProduct(req, res) {
   
       //checking priceLessThan
       if (priceLessThan) {
-        if (!isValidPrice(priceLessThan.trim())) {
+        if (!isValidPrice(priceLessThan)) {
           return res.status(400).send({ status: false, msg: "priceLessThan must be in number" });
         }
         obj.price = { $lte: priceLessThan };
