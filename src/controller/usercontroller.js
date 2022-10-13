@@ -147,7 +147,7 @@ const register = async (req, res) => {
     }
 
     const newUser = await userModel.create(finalData)
-    return res.status(201).send({ status: true, message: 'Success', Data: newUser })
+    return res.status(201).send({ status: true, message: 'User created Successfully', Data: newUser })
 
   } catch (error) {
     res.status(500).send({ status: false, message: error.message })
@@ -214,7 +214,7 @@ const getUser = async function(req, res) {
         if(!fetchUser) {
             return res.status(404).send({ status: false, message: "user is not registerd" })
         }
-        return res.status(200).send({ status: true, message: "user profile details", data: fetchUser})
+        return res.status(200).send({ status: true, message: "User profile details", data: fetchUser})
     } catch (error) {
         return res.status(500).send({status: false, message: error.message})
     }
@@ -366,8 +366,6 @@ const updateUser = async (req, res) => {
 
   if(!user) return res.status(404).send({status: false, Message: "user not found" })
   return res.status(200).send({status: true, message: "User profile updated", data: user}) 
-
-
 
 }
 
