@@ -9,7 +9,7 @@ aws.config.update({
 let uploadFile = async (file) => {
   return new Promise(function (resolve, reject) { 
 
-    // creating S# service object
+    // creating S3 service object
     let s3 = new aws.S3({ apiVersion: "2006-03-01" });
 
     var uploadParams = {
