@@ -154,95 +154,68 @@ try {
     res.status(500).send({ status: false, message: err.message })
 }
 }
-const getProduct = async (req, res) => {
 
-    let {
 
-        size,
-        name,
-        priceGreaterThan,
-        priceLessThan,
-        priceSort
-
-    } = req.query
-
-    let filters = { 
-        isDeleted: false,
-        deletedAt: null 
+//=============================getProductsByQuerys=====================//
+async function getProduct(req, res) {
+    try {
+      let data = req.query;  
+      let { size, name, priceGreaterThan, priceLessThan, priceSort, ...rest } = data;  
+      let obj = {};
+  
+      if (Object.keys(rest).length > 0) {
+        return res.status(400).send({status: false, message: `You can not use these :- ( ${Object.keys(rest)} ) filters`});
+      }
+  
+      //checking size
+      if (size) {
+        if (!isValidString(size.trim())) {
+          return res.status(400).send({ status: false, msg: "size must be in string" });
+        }
+        let arr = size.split(",");
+        obj.availableSizes = { $in: arr };
+      }
+  
+      //checking name
+      if (name) {
+        if (!isValidString(name.trim())) {
+          return res.status(400).send({ status: false, msg: "name must be in string" });
+        }
+        obj.title = name;
+      }
+  
+      //checking priceGreaterThan
+      if (priceGreaterThan) {
+        if (!isValidPrice(priceGreaterThan.trim())) {
+          return res.status(400).send({ status: false, msg: "priceGreaterThan must be in number" });
+        }
+        obj.price = { $gte: priceGreaterThan };
+      }
+  
+      //checking priceLessThan
+      if (priceLessThan) {
+        if (!isValidPrice(priceLessThan.trim())) {
+          return res.status(400).send({ status: false, msg: "priceLessThan must be in number" });
+        }
+        obj.price = { $lte: priceLessThan };
+      }
+  
+      //checking priceSort
+      if (priceSort) {
+        if (!(priceSort !== "-1" || priceSort !== "1")) {
+          return res.status(400).send({ status: false, msg: "priceSort must be in 1/-1" });
+        }
+        let getProduct = await productModel.find(obj).sort({ price: +priceSort });
+        return res.status(200).send({status: true, data: getProduct});
+      }
+  
+      //to find products
+      let getProduct = await productModel.find(obj);
+      return res.status(200).send({status: true, data: getProduct});
+    } catch (err) {
+      return res.status(500).send({ status: false, message: err.message });
     }
-
-    if ('size' in req.query) {
-
-        let validSizes = validate.isValidSize(JSON.parse(size))
-
-        if (!validSizes) {
-            return res.status(400).send({ status: false, message: `please Provide Available Size from ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
-        }
-        filters['size'] = { $in: validSizes }
-    }
-
-    if ('name' in req.query) {
-
-        if (!validate.isValid(name)) {
-            return res.status(400).send({ status: false, message: `invalid Input - Name` })
-        }
-        filters['title'] = { $regex: name ,$options: "i" }
-
-    }
-
-    if ('priceGreaterThan' in req.query && 'priceLessThan' in req.query) {
-
-        if (!validate.isValidNumber(parseInt(priceGreaterThan))) {
-            return res.status(400).send({ status: false, message: `invalid price - Enterd` })
-        }
-
-        if (!validate.isValidNumber(parseInt(priceLessThan))) {
-            return res.status(400).send({ status: false, message: `invalid price - Enterd` })
-        }
-
-        filters['price'] = { $gt: priceGreaterThan, $lt: priceLessThan }
-        
-
-    } else if ('priceGreaterThan' in req.query) {
-
-        if (!validate.isValidNumber(parseInt(priceGreaterThan))) {
-            return res.status(400).send({ status: false, message: `invalid price - Enterd` })
-        }
-
-        filters['price'] = { $gt: priceGreaterThan }
-
-
-    } else if ('priceLessThan' in req.query) {
-
-        if (!validate.isValidNumber(parseInt(priceLessThan))) {
-            return res.status(400).send({ status: false, message: `invalid price - Enterd` })
-        }
-
-        filters['price'] = { $lt: priceLessThan }
-
-
-    }
-
-    let sort = {}
-
-    if ('priceSort' in req.query) {
-
-        if (!['-1', '1'].includes(priceSort) || isNaN(priceSort)) {
-            return res.status(400).send({ status: false, message: `Please Enter valid Sorting ie[-1, 1]` })
-        }
-        sort['price'] = priceSort
-    }
-
-    const dataByFilters = await productModel.find(filters).sort(sort)
-
-    if (dataByFilters.length == 0) {
-        return res.status(404).send({ status: false, message: "no products with the given queries were found" })
-
-    }
-
-    return res.status(200).send({ status: true, message: `Success`, data: dataByFilters })
-
-}
+  }
 
 //....................................................................................................................
 

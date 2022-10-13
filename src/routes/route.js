@@ -5,9 +5,6 @@ const auth = require('../middleware/auth')
 const productController = require('../controller/productController')
 
 
-
-
-
 router.post('/register', userController.register)
 router.post('/login', userController.login)
 router.get('/user/:userId/profile',auth.authenticate, userController.getUser)
