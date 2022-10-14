@@ -30,7 +30,7 @@ const authenticate = async function (req, res, next) {
 const authorization = async function (req, res, next) {
     try {
         let userId = req.params.userId
-        // if(!userId) return res.status(400).send({status: false, message: "Please, enter correct userId"})
+        if(!userId) return res.status(400).send({status: false, message: "Please, enter correct userId"})
         
 
         if(!ObjectId.isValid(userId)) return res.status(400).send({status: false, message: "Please, enter correct userId"})

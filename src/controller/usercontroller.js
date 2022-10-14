@@ -10,16 +10,13 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const register = async (req, res) => {
   try {
 
-   let requestBody = JSON.parse(JSON.stringify(req.body))
-   //let requestBody=req.body
+   let requestBody= req.body
 
     if (!validator.isValidRequestBody(requestBody)) {
       return res.status(400).send({ status: false, message: 'invalid Input Parameters' })
     }
 
     let { fname, lname, email, phone, password, address } = requestBody
-
-    address = JSON.parse(address)
 
     let files = req.files
     let uploadedFileURL
@@ -86,6 +83,10 @@ const register = async (req, res) => {
       return res.status(400).send({ status: false, message: 'address is required' })
     }
 
+    if(typeof (address) == 'string') {
+      address = JSON.parse(address)
+    }
+
     if (!validator.isValid(address['shipping']['street'])) {
       return res.status(400).send({ status: false, message: 'Shipping Street is required' })
     }
@@ -98,7 +99,7 @@ const register = async (req, res) => {
       return res.status(400).send({ status: false, message: 'Shipping Pincode is required' })
     }
 
-    if (!validator.isValidPincode(parseInt(address['shipping']['pincode']))) {
+    if (!validator.isValidPincode(address['shipping']['pincode'])) {
       return res.status(400).send({ status: false, message: 'Invalid pincode' })
 
     }
@@ -117,7 +118,7 @@ const register = async (req, res) => {
       return res.status(400).send({ status: false, message: 'Billing Pincode is required' })
     }
 
-    if (!validator.isValidPincode(parseInt(address['billing']['pincode']))) {
+    if (!validator.isValidPincode(address['billing']['pincode'])) {
       return res.status(400).send({ status: false, message: 'Invalid pincode' })
     }
 
@@ -146,7 +147,7 @@ const register = async (req, res) => {
     }
 
     const newUser = await userModel.create(finalData)
-    return res.status(201).send({ status: true, message: 'Success', Data: newUser })
+    return res.status(201).send({ status: true, message: 'User created Successfully', Data: newUser })
 
   } catch (error) {
     res.status(500).send({ status: false, message: error.message })
@@ -213,7 +214,7 @@ const getUser = async function(req, res) {
         if(!fetchUser) {
             return res.status(404).send({ status: false, message: "user is not registerd" })
         }
-        return res.status(200).send({ status: true, message: "user profile details", data: fetchUser})
+        return res.status(200).send({ status: true, message: "User profile details", data: fetchUser})
     } catch (error) {
         return res.status(500).send({status: false, message: error.message})
     }
@@ -227,21 +228,21 @@ const updateUser = async (req, res) => {
   let file = req.files
   let obj = {}
 
-  if(file) {
+  
           
-    if(file.length > 0) {
+    if(file && file.length > 0) {
       if(!validator.isValidImage(file[0])) {
         return res.status(400).send({status: false, Message: "Invalid image type" })
       }
-    } else {
-    return res.status(400).send({ status: false, message: 'Please, provide file to upload' })
-    }
-  let uploadedFileURL = await aws.uploadFile(file[0])
-  if(uploadedFileURL) obj['profileImage'] = uploadedFileURL
-}
+
+      let uploadedFileURL = await aws.uploadFile(file[0])
+      if(uploadedFileURL) obj['profileImage'] = uploadedFileURL
+    } 
+  
+
   
   let data = req.body
-  if(!validator.isValidRequestBody(data) && !file) return res.status(400).send({status: false, message: "Enter data which you want to update!"})
+  if(Object.keys(data).length == 0 && !file) return res.status(400).send({status: false, message: "Enter data which you want to update!"})
   
 
   
@@ -292,7 +293,7 @@ const updateUser = async (req, res) => {
     }
     
     if(!validator.isvalidPass(data.password)) {
-      return res.status(400) .send({ status: false, message: 'please should be in between 8 - 15' })
+      return res.status(400) .send({ status: false, message: 'Password should be in between 8 - 15' })
     }
     hashedPassword = await validator.hashedPassword(data.password);
     obj['password'] = hashedPassword
@@ -313,50 +314,82 @@ const updateUser = async (req, res) => {
     obj['phone'] = data.phone
   }
 
+
   if(data.address) {
+    if(typeof (data.address) == 'string') {
+       data.address = JSON.parse(data.address)
+    }
     let {shipping, billing} = data.address
+ 
         if(shipping) {
-          if (!validator.isValid(data.address['shipping']['street'])) {
-            return res.status(400).send({ status: false, message: 'Shipping Street is required' })
+          if(data.address['shipping']['street']){
+
+            if (!validator.isValid(data.address['shipping']['street'])) {
+              return res.status(400).send({ status: false, message: 'Shipping Street is required' })
+            }
+
+            obj["address.shipping.street"] = data.address.shipping.street;
+
           }
-            if (!validator.isValid(data.address['shipping']['city'])) {
-              return res .status(400).send({ status: false, message: 'Shipping city is required' })
+            if (data.address['shipping']['city']) {
+
+              if(!validator.isValid(data.address['shipping']['city'])) {
+                return res .status(400).send({ status: false, message: 'Shipping city is required' })
+              }
+
+              obj["address.shipping.city"] = data.address.shipping.city;
+
             }
-           
-            if (!validator.isValid(data.address['shipping']['pincode'])) {
-              return res.status(400).send({ status: false, message: 'Shipping Pincode is required' })
+            
+            if(data.address['shipping']['pincode']) {
+
+              if (!validator.isValid(data.address['shipping']['pincode'])) {
+                return res.status(400).send({ status: false, message: 'Shipping Pincode is required' })
+              }
+              
+              if (!validator.isValidPincode((data.address['shipping']['pincode']))) {
+                return res.status(400).send({ status: false, message: 'Invalid pincode' })
+              }
+
+              obj["address.shipping.pincode"] = data.address.shipping.pincode;
             }
-    
-            if (!validator.isValidPincode(parseInt(data.address['shipping']['pincode']))) {
-              return res.status(400).send({ status: false, message: 'Invalid pincode' })
-            }
-          }else {
-            return res.status(400).send({ status: false, message: 'Shipping address is required' })
+            
           }
 
             if(billing) { 
-        
-              if (!validator.isValid(data.address['billing']['street'])) {
-                return res.status(400).send({ status: false, message: 'Billing Street is required' })
-              }
-        
-              if (!validator.isValid(data.address['billing']['city'])) {
-                return res.status(400).send({ status: false, message: 'Billing city is required' })
-            
-              }
-        
-              if (!validator.isValid(data.address['billing']['pincode'])) {
-                return res.status(400).send({ status: false, message: 'Billing Pincode is required' })
-              }
-        
-              if (!validator.isValidPincode(parseInt(data.address['billing']['pincode']))) {
-                return res.status(400).send({ status: false, message: 'Invalid pincode' })
+              if(data.address['billing']['street']) {
+
+                if (!validator.isValid(data.address['billing']['street'])) {
+                  return res.status(400).send({ status: false, message: 'Billing Street is required' })
+                }
+
+                obj["address.billing.street"] = data.address.billing.street;
+
               }
               
-            } else {
-              return res.status(400).send({ status: false, message: 'Billing address is required' })
+              if(data.address['billing']['city']) {
+
+                if (!validator.isValid(data.address['billing']['city'])) {
+                  return res.status(400).send({ status: false, message: 'Billing city is required' })
+                }
+
+                obj["address.billing.city"] = data.address.billing.city;
+              }
+              
+              if(data.address['billing']['pincode']) {
+
+                if (!validator.isValid(data.address['billing']['pincode'])) {
+                  return res.status(400).send({ status: false, message: 'Billing Pincode is required' })
+                }
+          
+                if (!validator.isValidPincode(data.address['billing']['pincode'])) {
+                  return res.status(400).send({ status: false, message: 'Invalid pincode' })
+                }
+              }
+              
+              obj["address.billing.pincode"] = data.address.billing.pincode;
+
             }
-            obj['address'] = data.address
   
         }
   
@@ -365,8 +398,6 @@ const updateUser = async (req, res) => {
 
   if(!user) return res.status(404).send({status: false, Message: "user not found" })
   return res.status(200).send({status: true, message: "User profile updated", data: user}) 
-
-
 
 }
 
