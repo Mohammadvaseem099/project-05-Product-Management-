@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs/dist/bcrypt")
+const mongoose = require('mongoose')
 
 
 
@@ -70,6 +71,24 @@ const isValidNumber = function (value) {
     return (!isNaN(value) && value > 0)
 }
 
+const isValidBoolean = function (value) {
+     if(value == "true" || value == "false") return true;
+     return false;
+
+}
+
+const isValidSizes = function (arr) {
+    if(!arr.length > 0) return false;
+
+    let newArr = []
+
+    for(let i = 0; i < arr.length; i++) {
+        if(!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(arr[i].toUpperCase())) return false;
+        newArr.push(arr[i].toUpperCase());
+    }
+    return newArr;
+}
+
 module.exports = {
     
     isValid,
@@ -83,5 +102,7 @@ module.exports = {
     isValidCharacters,
     isValidSize,
     isValidNumber,
-    isValidObjectId
+    isValidObjectId,
+    isValidBoolean,
+    isValidSizes
 }
