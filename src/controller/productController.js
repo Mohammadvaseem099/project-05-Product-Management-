@@ -160,6 +160,7 @@ try {
 }
 }
 
+/////////////////////////// GET PRODUCT ///////////////////////////////////////
 
 const getProduct = async (req, res) => {
 try{
@@ -243,7 +244,7 @@ try{
 }
 }
 
-//....................................................................................................................
+//............................................GET PRODUCT BY ID........................................................................
 
 const getProductById = async function (req, res) {
     try {
@@ -333,7 +334,7 @@ const updateProduct = async function (req, res) {
 
     if(isFreeShipping) {
         if(!validate.isValidBoolean(isFreeShipping)) {
-        return res .status(400).send({ status: false, message: `is Free Shipping Should Be a Boolean value` })
+        return res.status(400).send({ status: false, message: `is Free Shipping Should Be a Boolean value` })
         }
         obj['isFreeShipping'] = isFreeShipping
     }

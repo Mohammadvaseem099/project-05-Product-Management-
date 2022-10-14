@@ -293,7 +293,7 @@ const updateUser = async (req, res) => {
     }
     
     if(!validator.isvalidPass(data.password)) {
-      return res.status(400) .send({ status: false, message: 'please should be in between 8 - 15' })
+      return res.status(400) .send({ status: false, message: 'Password should be in between 8 - 15' })
     }
     hashedPassword = await validator.hashedPassword(data.password);
     obj['password'] = hashedPassword
