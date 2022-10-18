@@ -17,10 +17,10 @@ router.put("/products/:productId", productController.updateProduct);
 router.delete("/products/:productId", productController.deleteProduct);
 
 
-router.post('/users/:userId/cart', auth.auth, cartController.createCart)
-router.put('/users/:userId/cart', auth.auth, cartController.updateCart)
-router.get('/users/:userId/cart', auth.auth, cartController.getById)
-router.delete('/users/:userId/cart', auth.auth, cartController.deleteCart)
+router.post('/users/:userId/cart', auth.authenticate, cartController.createCart)
+router.get('/users/:userId/cart', auth.authenticate, cartController.getById)
+router.put('/users/:userId/cart', auth.authenticate, cartController.updateCart)
+router.delete('/users/:userId/cart', auth.authenticate, cartController.deleteCart)
 
 
 
