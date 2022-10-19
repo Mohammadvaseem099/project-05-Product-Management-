@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require("../controller/usercontroller");
 const auth = require("../middleware/auth");
 const productController = require("../controller/productController");
-const cartController = require('../controller/cartController')
+const cartController = require('../controller/cartcontroller')
 
 router.post("/register", userController.register);
 router.post("/login", userController.login);
@@ -17,12 +17,15 @@ router.put("/products/:productId", productController.updateProduct);
 router.delete("/products/:productId", productController.deleteProduct);
 
 
-router.post('/users/:userId/cart', auth.auth, cartController.createCart)
-router.put('/users/:userId/cart', auth.auth, cartController.updateCart)
-router.get('/users/:userId/cart', auth.auth, cartController.getById)
-router.delete('/users/:userId/cart', auth.auth, cartController.deleteCart)
+router.post('/users/:userId/cart', auth.authenticate, cartController.createCart)
+router.put('/users/:userId/cart', auth.authenticate, cartController.updateCart)
+router.get('/users/:userId/cart', auth.authenticate, cartController.getById)
+router.delete('/users/:userId/cart', auth.authenticate, cartController.deleteCart)
 
 
-
+router.all("/*", function (req, res) {
+    res.status(400).send({status: false, message: "Make Sure Your Endpoint is Correct !!!"
+    })
+})
 
 module.exports = router;
