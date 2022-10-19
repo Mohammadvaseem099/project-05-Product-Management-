@@ -6,7 +6,10 @@ const ObjectId = require('mongoose').Types.ObjectId
 
 const authenticate = async function (req, res, next) {
     try{
-        let token = req.headers['authorization'].split(" ")
+        let token = req.headers['authorization']
+        if(!token) return res.status(404).send({status: false, message: "Token must be present"})
+
+        token = req.headers['authorization'].split(" ")
         let token1 = token[1];
         if(!token1) {
             return res.status(404).send({status: false, message: "Token must be present"})
