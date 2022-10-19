@@ -40,7 +40,8 @@ try {
     if (!validator.isValidObjectId(productId)) {
         return res.status(400).send({ status: false, msg: "enter a valid productId" })
     }
-    const product = await productModel.findOne({ _id: productId, isDeleted: false });
+    const product = await productModel.findOne({ _id: productId, isDeleted: false }).select({title: 1, price:1, productImage:1});
+    
     if (!product) {
         return res.status(404).send({ status: false, message: "product not found" })
     }
@@ -51,21 +52,28 @@ try {
     if (!isCartExist) {
 // cartId for this user is not exist wrong cart id
         if('cartId' in requestBody) return res.status(400).send({ Status: false, message: "CartId for this user is not created yet... Please, provide only Productid" })
+
         let newCartData = {
             userId,
             items:
                 [
                     {
-                        productId: product._id,
-                        quantity: 1
+                        productId: product,
+                        quantity: 1,
                     }
                 ],
             totalPrice: product.price,
             totalItems: 1
         }
-    const newCart = await cartModel.create(newCartData)
+
+      
+    const newCart = await (await cartModel.create(newCartData))
     return res.status(201).send({ status: true, message: `Success`, data: newCart })
+
     }
+
+    // if cart is already created then we need cartId for update the products in card
+
     if (!req.body.hasOwnProperty('cartId')) {
         return res.status(400).send({ status: false, message: `The Cart Is Aleady Present for ${userId} userId, Please Enter corresponding CartID` })
     }
@@ -80,7 +88,7 @@ try {
         {$inc : {
             totalPrice : + product.price,
             "items.$.quantity" : +1
-        } }, {new : true} )
+        }}, {new : true} ).populate('items.productId')
 
         return res.status(200).send({ status: true, message: `Success`, data: updatedCart })
 
@@ -89,7 +97,7 @@ try {
         {
             $addToSet: { items: { productId : productId, quantity : +1 } },
             $inc : { totalPrice : + product.price , totalItems : +1 }
-        }, {new: true })
+        }, {new: true }).populate('items.productId')
         return res.status(201).send({ status: true, message: `Success`, data: updatedCart })
 }catch (err) {
     return res.status(500).send({ status: false, message: err.message })
@@ -172,7 +180,7 @@ try {
             $pull: { items: { productId: productId } },
              $inc : { totalPrice: -productPrice, totalItems : -1}//-itemList[index].quantity }
 
-        }, { new: true })
+        }, { new: true }).populate('items.productId')
 
         return res.status(200).send({ status: true, message: 'sucessfully Removed Product', data: updatedCart })
 
@@ -211,7 +219,7 @@ const deleteCart = async function (req, res) {
             if (!isCart) { return res.status(404).send({ Status: false, message: "No cart exists For this user" }) }
             let updatedCart = await cartModel.findOneAndUpdate({ userId: id },
                 { $set: { items: [], totalItems: 0, totalPrice: 0 } })
-            return res.status(200).send({ status: true, message: "Cart deleted successfuly" })
+            return res.status(204).send({ status: true, message: "Cart deleted successfuly" })
 
 
         } else {
@@ -245,13 +253,13 @@ const getById = async function (req, res) {
 
         if (id == req.token1.id) {
 
-            let isCart = await cartModel.findOne({ userId: id })
+            let isCart = await cartModel.findOne({ userId: id }).populate('items.productId')
     
-            if (isCart.items.length == 0) {
+            if (!isCart) {
                 return res.status(404).send({ status: false, message: "Cart not found" })
             }
 
-            return res.status(200).send({ status: true, message: "Successfull", data: isCart })
+            return res.status(200).send({ status: true, message: "Successfully", data: isCart })
 
         } else {
             return res.status(403).send({ status: false, message: "User not authorized to view requested cart" })
