@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken')
 const ObjectId = require("mongoose").Types.ObjectId;
 
 
+//=======================================Register User Api==============================================
+
 
 const register = async (req, res) => {
   try {
@@ -136,15 +138,7 @@ const register = async (req, res) => {
 
     uploadedFileURL = await aws.uploadFile(files[0]);
 
-    let finalData = {
-      fname,
-      lname,
-      email,
-      profileImage: uploadedFileURL,
-      phone,
-      password: hashedPassword,
-      address
-    }
+    let finalData = {fname, lname, email, profileImage: uploadedFileURL, phone, password: hashedPassword, address}
 
     const newUser = await userModel.create(finalData)
     return res.status(201).send({ status: true, message: 'User created Successfully', Data: newUser })
@@ -154,7 +148,9 @@ const register = async (req, res) => {
   }
 }
 
-//////////////////////////////////// LOGIN API ////////////////////////////////////////////////////////////////
+
+//=========================================Login User Api=================================================
+
 
 const login = async (req, res) => {
   try{
@@ -174,6 +170,8 @@ const login = async (req, res) => {
   
       return res.status(404).send({status:false, message: "user is not exists"})
     }
+
+    //=====================================Jwt (jsonwebtoken)============================================
   
     const token = jwt.sign({
       id: user._id.toString(),
@@ -194,7 +192,8 @@ const login = async (req, res) => {
 }
 
 
-///////////////////////////// GET USER API /////////////////////////////////////////////////////////////////////
+//===========================================Get User Api=================================================
+
 
 const getUser = async function(req, res) {
     try{
@@ -221,7 +220,8 @@ const getUser = async function(req, res) {
 }
 
 
-////////////////////////////////////// UPDATE USER /////////////////////////////////////////////////////////
+//=========================================Update User Api===============================================
+
 
 const updateUser = async (req, res) => {
   

@@ -3,6 +3,9 @@ const userModel = require('../model/userModel')
 const productModel = require('../model/productModel')
 const validator = require('../validator/validator')
 
+
+//=======================================Create Cart Api=========================================
+
 const createCart = async function (req, res) {
 try {
     const userId = req.params.userId.trim()
@@ -104,7 +107,8 @@ try {
 }
 }
 
-////////////////////////// UPDATE CART ///////////////////////////////////////////
+
+//===================================Update Cart Api==============================================
 
 
 const updateCart = async (req, res) => {
@@ -201,6 +205,8 @@ try {
 
 
 
+//======================================Delete Cart Api==============================================
+
 
 const deleteCart = async function (req, res) {
     try {
@@ -233,7 +239,7 @@ const deleteCart = async function (req, res) {
 }
 
 
-
+//===========================================Get By Id Api==================================================
 
 const getById = async function (req, res) {
 
@@ -273,7 +279,4 @@ const getById = async function (req, res) {
 }
 
 
-module.exports.createCart = createCart
-module.exports.updateCart = updateCart
-module.exports.getById = getById
-module.exports.deleteCart=deleteCart
+module.exports = {createCart, updateCart, getById, deleteCart}
