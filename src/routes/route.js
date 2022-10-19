@@ -4,6 +4,7 @@ const userController = require("../controller/usercontroller");
 const auth = require("../middleware/auth");
 const productController = require("../controller/productController");
 const cartController = require('../controller/cartcontroller')
+const orderController = require('../controller/ordercontroller')
 
 router.post("/register", userController.register);
 router.post("/login", userController.login);
@@ -21,6 +22,12 @@ router.post('/users/:userId/cart', auth.authenticate, cartController.createCart)
 router.put('/users/:userId/cart', auth.authenticate, cartController.updateCart)
 router.get('/users/:userId/cart', auth.authenticate, cartController.getById)
 router.delete('/users/:userId/cart', auth.authenticate, cartController.deleteCart)
+
+
+router.post('/users/:userId/orders', auth.authenticate, orderController.createOrder)
+router.put('/users/:userId/orders', auth.authenticate, orderController.updateOrder)
+
+
 
 
 router.all("/*", function (req, res) {
