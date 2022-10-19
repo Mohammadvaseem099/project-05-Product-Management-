@@ -46,6 +46,7 @@ const isvalidPass = (password) => {
 
 }
 const isValidSize = (Arr) => {
+    console.log(typeof Arr)
     let newArr = []
     if (!Arr.length > 0)
         return false

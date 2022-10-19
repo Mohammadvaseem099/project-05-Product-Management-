@@ -11,6 +11,11 @@ const register = async (req, res) => {
   try {
 
    let requestBody= req.body
+   let files = req.files
+   let uploadedFileURL
+
+   if(Object.keys(requestBody).length == 0 && !files) return res.status(400).send({status: false, message: "invalid request body !"})
+
 
     if (!validator.isValidRequestBody(requestBody)) {
       return res.status(400).send({ status: false, message: 'invalid Input Parameters' })
@@ -18,11 +23,9 @@ const register = async (req, res) => {
 
     let { fname, lname, email, phone, password, address } = requestBody
 
-    let files = req.files
-    let uploadedFileURL
 
     if (!validator.isValid(fname)) {
-      return res.status(400).send({ Status: false, Message: ' First Name Mandotary' })
+      return res.status(400).send({ Status: false, Message: 'First Name is Mandotary' })
     }
 
     if (!validator.isValidCharacters(fname)) {
@@ -31,7 +34,7 @@ const register = async (req, res) => {
 
 
     if (!validator.isValid(lname)) {
-      return res.status(400).send({ Status: false, message: 'invalid last Name' })
+      return res.status(400).send({ Status: false, message: 'last Name is Mandotary' })
     }
 
     if (!validator.isValidCharacters(lname)) {
@@ -39,7 +42,7 @@ const register = async (req, res) => {
     }
 
     if (!validator.isValid(email)) {
-      return res .status(400).send({ status: false, message: 'email is required' })
+      return res .status(400).send({ status: false, message: 'email is Mandotary' })
     }
 
     if (!validator.isValidEmail(email)) {
@@ -87,6 +90,10 @@ const register = async (req, res) => {
       address = JSON.parse(address)
     }
 
+    if(!address.shipping){
+      return res.status(400).send({status: false, message: "Please enter Shipping address"});
+    }
+
     if (!validator.isValid(address['shipping']['street'])) {
       return res.status(400).send({ status: false, message: 'Shipping Street is required' })
     }
@@ -103,6 +110,11 @@ const register = async (req, res) => {
       return res.status(400).send({ status: false, message: 'Invalid pincode' })
 
     }
+
+    if(!address.billing){
+      return res.status(400).send({status: false, message: "Please enter billing address"});
+    }
+
 
     if (!validator.isValid(address['billing']['street'])) {
       return res.status(400).send({ status: false, message: 'Billing Street is required' })
@@ -131,7 +143,7 @@ const register = async (req, res) => {
       }
 
     } else {
-      return res.status(400).send({ status: false, message: "Please, provide file to upload" });
+      return res.status(400).send({ status: false, message: "profile image is mandatory" });
     }
 
     uploadedFileURL = await aws.uploadFile(files[0]);

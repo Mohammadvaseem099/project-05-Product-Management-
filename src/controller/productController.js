@@ -7,13 +7,16 @@ const createProduct = async (req, res) => {
 try {
 
     let requestBody = req.body
+    let files = req.files
+
+    if(Object.keys(requestBody).length == 0 && !files) return res.status(400).send({status: false, message: "invalid request body !"})
+
 
     if (!validate.isValidRequestBody(requestBody)) {
 
         return res.status(400).send({ status: false, message: `invalid request params` })
     }
 
-    let files = req.files
     if (files && files.length > 0) {
 
         if (!validate.isValidImage(files[0])) {
@@ -99,17 +102,13 @@ try {
 
     }
 
-    
- 
     let arr
     if(availableSizes) {
-
-        arr = availableSizes.split(" ")
+        arr = availableSizes.split(",")
         
         if(!validate.isValidSizes(arr)){
             return res.status(400).send({ status: false, message: `please Provide Available Size from ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
         } 
-    
     }
 
 
@@ -170,12 +169,13 @@ try{
     let filters = { isDeleted: false, deletedAt: null }
 
     if ('size' in req.query) {
+        let arr = size.split(",")
     
-        let validSizes = validate.isValidSize(JSON.parse(size))
-
-        if (!validSizes) {
+        if (!validate.isValidSizes(arr)) {
             return res.status(400).send({ status: false, message: `please Provide Available Size from ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
         }
+
+        let validSizes = validate.isValidSizes(arr)
         filters['availableSizes'] = { $in: validSizes }
     }
 
@@ -286,7 +286,7 @@ const updateProduct = async function (req, res) {
     if(!validate.isValidRequestBody(body)) return res.status(400).send({ status: false, message: "Enter attributes which want to update"})
 
     const {title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = body
-    const obj = {isDeleted: false}
+    const obj = {}
 
     if(title) {
         if(!validate.isValid(title)) 
@@ -359,7 +359,7 @@ const updateProduct = async function (req, res) {
 
     if(availableSizes) {
 
-        let arr = availableSizes.split(" ")
+        let arr = availableSizes.split(",")
         
         if(!validate.isValidSizes(arr)){
             return res.status(400).send({ status: false, message: `please Provide Available Size from ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
@@ -384,8 +384,10 @@ const updateProduct = async function (req, res) {
         }
         obj['installments'] = installments
     }
-    
-    let productUpdate = await productModel.findOneAndUpdate({_id: pId}, obj, {new: true});
+
+    let filter = {_id: pId, isDeleted: false, deletedAt: null}
+
+    let productUpdate = await productModel.findOneAndUpdate(filter, obj, {new: true});
     if(!productUpdate) return res.status(404).send({ status: false, message: "Product is not Found"})
 
     return res.status(200).send({sttus: true, Message: "Success", data: productUpdate})
@@ -393,18 +395,19 @@ const updateProduct = async function (req, res) {
 
 }
 
-//////////////////////// DELETE PRODUCT \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//////////////////////// DELETE PRODUCT ///////////////////////////////////
 
 
 const deleteProduct = async (req, res) => {
     const pId = req.params.productId;
     if(!validate.isValidObjectId(pId)) return res.status(400).send({ status: false, message: "Enter valid ProductId"})
 
-    let obj = {pId, isDeleted: false}
+    let filter = {_id: pId, isDeleted: false, deletedAt: null}
 
     let TIME = moment().format()
 
-    let product = await productModel.findOneAndUpdate(obj, {$set:{isDeleted: true, deletedAt: TIME}}, {new: true})
+
+    let product = await productModel.findOneAndUpdate(filter, {$set:{isDeleted: true, deletedAt: TIME}}, {new: true})
     if(!product) return res.status(404).send({ status: false, message: "Product is not found"})
 
     return res.status(200).send({status: true, Message: "Success", data: product})
