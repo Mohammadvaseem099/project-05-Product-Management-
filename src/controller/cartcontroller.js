@@ -142,9 +142,6 @@ try {
 }
 }
 
-
-
-
 const updateCart = async (req, res) => {
 
 try {
@@ -172,7 +169,6 @@ try {
 
     if (!validator.isValidRequestBody(requestBody)) {
         return res.status(400).send({ status: false, message: `Invalid Request parameters` });
-
     }
 
     let {
@@ -198,7 +194,6 @@ try {
 
     if (!validator.isValidObjectId(cartId)) {
         return res.status(400).send({ status: false, message: `invalid Cart Id` })
-
     }
 
     if (isCartExist._id != cartId) {
@@ -208,7 +203,6 @@ try {
 
     if (!validator.isValid(productId)) {
         return res.status(400).send({ status: false, message: "enter the productId" })
-
     }
 
     productId = productId.trim()
@@ -221,7 +215,6 @@ try {
     const isProductExist = await productModel.findOne({ _id: productId, isDeleted: false })
     if (!isProductExist) {
         return res.status(404).send({ status: false, message: `Product Not Exist` })
-
     }
 
     if (!req.body.hasOwnProperty('removeProduct')) {
@@ -232,7 +225,6 @@ try {
     
     if (isNaN(removeProduct)) {
         return res.status(400).send({ status: false, message: "enter the value for removeProduct" })
-
     }
 
     if (!(removeProduct === 1 || removeProduct === 0)) {
@@ -247,7 +239,6 @@ try {
 
     if(index == -1) {
         return res.status(400).send({ status: false, message: `Product Does Not Exist In Cart` })
-        
     }
 
     if (removeProduct == 0 || (removeProduct == 1 && itemList[index]['quantity'] == 1)) {
@@ -282,9 +273,6 @@ try {
     return res.status(400).send({ status: false, message: err.message })
 }
 }
-
-module.exports.updateCart = updateCart
-
 
 const deleteCart = async function (req, res) {
 
@@ -373,3 +361,4 @@ const getById = async function (req, res) {
 module.exports.createCart = createCart
 module.exports.getById = getById
 module.exports.deleteCart=deleteCart
+module.exports.updateCart = updateCart
