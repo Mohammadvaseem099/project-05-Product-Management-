@@ -1,8 +1,8 @@
-const userModel = require('../models/userModel')
-const cartModel = require('../models/cartModel')
-const productModel = require('../models/productModel')
-const validators = require('../validator/validators')
-const orderModel = require('../models/orderModel')
+const userModel = require('../model/userModel')
+const cartModel = require('../model/cartModel')
+const productModel = require('../model/productModel')
+const validators = require('../validator/validator')
+const orderModel = require('../model/orderModel')
 
 const createOrder = async (req, res) => {
 

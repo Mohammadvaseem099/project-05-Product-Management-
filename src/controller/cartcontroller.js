@@ -161,18 +161,25 @@ try {
     if (!req.body.hasOwnProperty('removeProduct')) {
         return res.status(400).send({ status: false, message: "removeProduct key Should Be present" })
     }
+
     if (isNaN(removeProduct)) {
         return res.status(400).send({ status: false, message: "enter the value for removeProduct" })
     }
+
     if (!(removeProduct === 1 || removeProduct === 0)) {
         return res.status(400).send({ status: false, message: `invalid input - remove Product key Should Be a number 1 or 0` })
     }
+
     itemList = isCartExist.items
+    console.log(itemList)
     let idList = itemList.map( (ele) => ele = ele.productId.toString() )
+
     let index = idList.indexOf(productId)
-    if(index == -1) {
-        return res.status(400).send({ status: false, message: `Product Does Not Exist In Cart` })
-    }
+
+    if(index == -1) return res.status(400).send({ status: false, message: `Product Does Not Exist In Cart` })
+    
+
+
     if (removeProduct == 0 || (removeProduct == 1 && itemList[index]['quantity'] == 1)) {
         let productPrice = itemList[index].quantity * isProductExist.price
         const updatedCart = await cartModel.findOneAndUpdate({ userId: userId },
@@ -191,7 +198,7 @@ try {
         {
             $inc : { totalPrice: -isProductExist.price,
             "items.$.quantity" : -1 }
-        }, { new: true })
+        }, { new: true }).populate('items.productId')
         return res.status(200).send({ status: true, message: 'sucessfully Removed Product', data: updatedCart })
     }
 }catch (err) {
@@ -200,39 +207,7 @@ try {
 }
 
 
-
-
-const deleteCart = async function (req, res) {
-    try {
-        let id = req.params.userId.trim()
-        if (!validator.isValidObjectId(id)) {
-            return res.status(400).send({ status: false, message: "Please provide valid Object id" })
-        }
-        let user = await userModel.findById(id)
-        if (!user) {
-            return res.status(404).send({ status: false, message: "User with this user id does not exist" })
-        }
-
-        if (id == req.token1.id) {
-
-            let isCart = await cartModel.findOne({ userId: id })
-            if (!isCart) { return res.status(404).send({ Status: false, message: "No cart exists For this user" }) }
-            let updatedCart = await cartModel.findOneAndUpdate({ userId: id },
-                { $set: { items: [], totalItems: 0, totalPrice: 0 } })
-            return res.status(204).send({ status: true, message: "Cart deleted successfuly" })
-
-
-        } else {
-            return res.status(403).send({ status: false, message: "User not authorized to delete cart" })
-        }
-    }
-    catch (err) {
-        return res.status(500).send({ status: false, message: err.message })
-    }
-
-}
-
-
+/////////////////////// GET CART BY ID ////////////////////////////////////////
 
 
 const getById = async function (req, res) {
@@ -271,6 +246,40 @@ const getById = async function (req, res) {
     }
 
 }
+
+
+/////////////////////////// DELETE CART ////////////////////////////////////////////////////
+
+const deleteCart = async function (req, res) {
+    try {
+        let id = req.params.userId.trim()
+        if (!validator.isValidObjectId(id)) {
+            return res.status(400).send({ status: false, message: "Please provide valid Object id" })
+        }
+        let user = await userModel.findById(id)
+        if (!user) {
+            return res.status(404).send({ status: false, message: "User with this user id does not exist" })
+        }
+
+        if (id == req.token1.id) {
+
+            let isCart = await cartModel.findOne({ userId: id })
+            if (!isCart) { return res.status(404).send({ Status: false, message: "No cart exists For this user" }) }
+            let updatedCart = await cartModel.findOneAndUpdate({ userId: id },
+                { $set: { items: [], totalItems: 0, totalPrice: 0 } })
+            return res.status(204).send({ status: true, message: "Cart deleted successfuly", data: updatedCart})
+
+
+        } else {
+            return res.status(403).send({ status: false, message: "User not authorized to delete cart" })
+        }
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+    }
+
+}
+
 
 
 module.exports.createCart = createCart
