@@ -6,7 +6,6 @@ const orderModel = require('../model/orderModel')
 
 const createOrder = async (req, res) => {
 
-
     userId = req.params.userId.trim()
     if (!validators.isValidObjectId(userId)) {
         return res
@@ -16,10 +15,10 @@ const createOrder = async (req, res) => {
 
     const isUserExist = await userModel.findById(userId)
     if (!isUserExist) {
-        return res.status(404).send({ status: false, message: `userNot Found Please Check User Id` })
+        return res.status(404).send({ status: false, message: `user Not Found Please Check User Id` })
     }
     //Authorization
-    if (isUserExist._id != req.userId) {
+    if (isUserExist._id != req.token1.id) {
         return res.status(403).send({ status: false, message: `Unauthorized Request !` })
     }
 
@@ -74,7 +73,7 @@ const createOrder = async (req, res) => {
     if (!req.body.hasOwnProperty('totalItems')) {
         return res
             .status(400)
-            .send({ status: false, message: `total Price Should Be Present In Request Body` })
+            .send({ status: false, message: `total Items Should Be Present In Request Body` })
     }
 
     if (!validators.isValidNumber(totalItems)) {
@@ -96,15 +95,7 @@ const createOrder = async (req, res) => {
     }
 
 
-    const newOrderData = {
-
-        userId,
-        items,
-        totalPrice,
-        totalItems,
-        totalQuantity
-
-    }
+    const newOrderData = { userId, items, totalPrice, totalItems, totalQuantity }
 
     const newOrder = await orderModel.create(newOrderData)
     res.status(201).send({ status: true, message: `Success`, data: newOrder })
