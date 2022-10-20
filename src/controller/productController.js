@@ -3,6 +3,9 @@ const validate = require('../validator/validator.js')
 const aws = require('../validator/aws')
 const moment = require('moment')
 
+
+//=========================================Create Product Api================================================
+
 const createProduct = async (req, res) => {
 try {
 
@@ -28,18 +31,7 @@ try {
         return res.status(400).send({ status: false, message: "No file to write" });
     }
 
-    let {
-        title,
-        description,
-        price,
-        currencyId,
-        currencyFormat,
-        isFreeShipping,
-        style,
-        availableSizes,
-        installments,
-
-    } = requestBody
+    let {title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments} = requestBody
 
     if (!validate.isValid(title)) {
         return res.status(400) .send({ status: false, message: `title is required` })
@@ -159,7 +151,7 @@ try {
 }
 }
 
-/////////////////////////// GET PRODUCT ///////////////////////////////////////
+//=========================================Get Product Api==============================================
 
 const getProduct = async (req, res) => {
 try{
@@ -244,7 +236,9 @@ try{
 }
 }
 
-//............................................GET PRODUCT BY ID........................................................................
+
+//=====================================Get Product By Id Api==================================================
+
 
 const getProductById = async function (req, res) {
     try {
@@ -276,7 +270,9 @@ const getProductById = async function (req, res) {
     
 }
 
-//////////////////////////////// Update Product //////////////////////////////////////////
+
+//========================================Update Product Api================================================
+
 
 const updateProduct = async function (req, res) {
     let pId = req.params.productId;

@@ -3,6 +3,9 @@ const userModel = require('../model/userModel')
 const productModel = require('../model/productModel')
 const validator = require('../validator/validator')
 
+
+//=======================================Create Cart Api=========================================
+
 const createCart = async function (req, res) {
 try {
     const userId = req.params.userId.trim()
@@ -104,7 +107,8 @@ try {
 }
 }
 
-////////////////////////// UPDATE CART ///////////////////////////////////////////
+
+//===================================Update Cart Api==============================================
 
 
 const updateCart = async (req, res) => {
