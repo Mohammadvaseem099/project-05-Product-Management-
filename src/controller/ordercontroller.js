@@ -7,7 +7,7 @@ const orderModel = require('../model/orderModel')
 const createOrder = async (req, res) => {
     try{
        
-        userId = req.params.userId.trim()
+        let userId = req.params.userId.trim()
         if (!validate.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: `${userId} is Not A Valid User Id` })
         }
@@ -39,7 +39,7 @@ const createOrder = async (req, res) => {
         if(!isCartIdExists) return res.status(404).send({ status: false, message: `cart Not Found Please Check cart Id` })
 
         if(!isCartIdExists.items.length > 0) {
-            return res.status(400).send({ status: false, message: `Order is created, Cart is empty` })
+            return res.status(400).send({ status: false, message: `Cart is empty` })
         }
 
         if(cancellable) {
@@ -71,7 +71,7 @@ const createOrder = async (req, res) => {
           
         
         const newOrder = await orderModel.create(obj)
-        res.status(201).send({ status: true, message: `Success`, data: newOrder })
+        return res.status(201).send({ status: true, message: `Success`, data: newOrder })
 
     } 
     catch (err) {

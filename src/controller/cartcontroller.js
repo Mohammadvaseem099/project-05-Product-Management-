@@ -70,7 +70,7 @@ try {
         }
 
       
-    const newCart = await (await cartModel.create(newCartData))
+    const newCart = await cartModel.create(newCartData)
     return res.status(201).send({ status: true, message: `Success`, data: newCart })
 
     }
